@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Clickable Chatbot</title>
+  <style>
+    body { font-family: sans-serif; background: #f2f2f2; padding: 20px; }
+    #chat { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
+    .bot, .user { margin: 10px 0; }
+    .options button { margin: 5px; }
+  </style>
+</head>
+<body>
+  <div id="chat">
+    <div class="bot">🦉 Click a button to start!</div>
+    <div class="options"></div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const optionsDiv = document.querySelector('.options');
+
+    function sendMessage(message) {
+      // Display user message
+      const userDiv = document.createElement('div');
+      userDiv.className = 'user';
+      userDiv.textContent = `You: ${message}`;
+      chat.insertBefore(userDiv, optionsDiv);
+
+      // Send to server
+      fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const botDiv = document.createElement('div');
+        botDiv.className = 'bot';
+        botDiv.innerHTML = `<strong>Owl:</strong> ${data.reply}`;
+        chat.insertBefore(botDiv, optionsDiv);
+        
+        // Clear options
+        optionsDiv.innerHTML = '';
+        data.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.textContent = opt;
+          btn.onclick = () => sendMessage(opt);
+          optionsDiv.appendChild(btn);
+        });
+      });
+    }
+
+    // Start the bot
+    sendMessage('start');
+  </script>
+</body>
+</html>
