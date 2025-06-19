@@ -3,21 +3,59 @@
 <head>
   <title>Clickable Chatbot</title>
   <style>
-    body { font-family: sans-serif; background: #f2f2f2; padding: 20px; }
-    #chat { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
+    body { font-family: sans-serif; background: #f2f2f2; margin: 0; padding: 0; }
+    #chatbot-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+      width: 350px;
+      max-width: 90vw;
+    }
+    #chat {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px 10px 0 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      max-height: 400px;
+      min-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
     .bot, .user { margin: 10px 0; }
-    .options button { margin: 5px; }
+    .options {
+      margin-top: 10px;
+      flex-shrink: 0;
+    }
+    .options button { margin: 5px 5px 0 0; }
+    #clearChatBtn {
+      width: 100%;
+      border-radius: 0 0 10px 10px;
+      border: none;
+      background: #eee;
+      padding: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    #clearChatBtn:hover {
+      background: #e0e0e0;
+    }
   </style>
 </head>
 <body>
-  <div id="chat">
-    <div class="bot">🦉 Click a button to start!</div>
-    <div class="options"></div>
+  <div id="chatbot-container">
+    <div id="chat">
+      <div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div>
+      <div class="options"></div>
+    </div>
+    <button id="clearChatBtn">Clear Chat</button>
   </div>
-
   <script>
     const chat = document.getElementById('chat');
-    const optionsDiv = document.querySelector('.options');
+    let optionsDiv = document.querySelector('.options');
+    const clearChatBtn = document.getElementById('clearChatBtn');
 
     function sendMessage(message) {
       // Display user message
@@ -25,6 +63,9 @@
       userDiv.className = 'user';
       userDiv.textContent = `You: ${message}`;
       chat.insertBefore(userDiv, optionsDiv);
+
+      // Scroll to bottom after user message
+      chat.scrollTop = chat.scrollHeight;
 
       // Send to server
       fetch('/chat', {
@@ -34,11 +75,25 @@
       })
       .then(res => res.json())
       .then(data => {
+        // If user clicked 'Clear Chat' from options, reset chat UI
+        if (message === 'Clear Chat') {
+          chat.innerHTML = `
+            <div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div>
+            <div class="options"></div>
+          `;
+          optionsDiv = document.querySelector('.options');
+          sendMessage('start');
+          return;
+        }
+
         const botDiv = document.createElement('div');
         botDiv.className = 'bot';
         botDiv.innerHTML = `<strong>Owl:</strong> ${data.reply}`;
         chat.insertBefore(botDiv, optionsDiv);
-        
+
+        // Scroll to bottom after bot message
+        chat.scrollTop = chat.scrollHeight;
+
         // Clear options
         optionsDiv.innerHTML = '';
         data.options.forEach(opt => {
@@ -49,6 +104,16 @@
         });
       });
     }
+
+    // Clear chat and restart
+    clearChatBtn.onclick = function() {
+      chat.innerHTML = `
+        <div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div>
+        <div class="options"></div>
+      `;
+      optionsDiv = document.querySelector('.options');
+      sendMessage('start');
+    };
 
     // Start the bot
     sendMessage('start');
