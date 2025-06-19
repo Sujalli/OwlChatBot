@@ -29,7 +29,7 @@ function getBotResponse(message) {
 
     case 'About us':
       return {
-        reply: 'We are a friendly chatbot company!',
+        reply: 'At HumbleWalking, we believe studying abroad is more than just paperwork — it’s a life-changing journey. Founded by Yash Shah after years of experience living and working in Canada’s immigration and banking sectors, HumbleWalking was born out of real stories, personal struggles, and a passion for guiding others.!',
         options: ['Back', 'Contact', 'Countries']
       };
 
