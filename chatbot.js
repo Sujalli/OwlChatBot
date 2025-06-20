@@ -21,16 +21,16 @@ const map = {
 
 function getBotResponse(message) {
   switch (message) {
-    case 'start':
+    case 'Hello':
       return {
         reply: 'Welcome! What do you want to know?',
-        options: ['About us', 'Contact', 'Help', 'Countries']
+        options: ['About us', 'Contact', 'Countries']
       };
 
     case 'About us':
       return {
         reply: 'At HumbleWalking, we believe studying abroad is more than just paperwork — it’s a life-changing journey. Founded by Yash Shah after years of experience living and working in Canada’s immigration and banking sectors, HumbleWalking was born out of real stories, personal struggles, and a passion for guiding others.!',
-        options: ['Back', 'Contact', 'Countries','Clear Chat']
+        options: ['Back', 'Contact', 'Countries']
       };
 
     case 'Contact':
@@ -42,19 +42,19 @@ function getBotResponse(message) {
           💼 LinkedIn: <a href="https://www.linkedin.com/company/humblewalking/" target="_blank">linkedin.com/company/humblewalking</a><br>
           📞 Phone: <a href="tel:+919326213082">+91 93262 13082</a>
         `,
-        options: ['Back', 'Help', 'Countries','Clear Chat']
+        options: ['Back', 'Countries']
       };
 
     case 'More':
       return {
         reply: 'Select an option to learn more.',
-        options: ['About us', 'Contact', 'Countries','Clear Chat']
+        options: ['About us', 'Contact', 'Countries']
       };
 
     case 'Countries':
       return {
         reply: 'Here are the countries we currently serve:',
-        options: ['USA', 'Canada', 'Ireland', 'UK', 'Dubai', 'Singapore', 'Germany', 'Australia', 'Clear Chat','Back']
+        options: ['USA', 'Canada', 'Ireland', 'UK', 'Dubai', 'Singapore', 'Germany', 'Australia','Back']
       };
 
     case 'USA':
@@ -67,11 +67,14 @@ function getBotResponse(message) {
     case 'Australia':
       return {
         reply: `Great choice! We offer full support for studying abroad in ${map[message]}.`,
-        options: ['Countries', 'Clear Chat','Back']
+        options: ['Countries','Back']
       };
 
     case 'Back':
-      return getBotResponse('start');
+      return {
+        reply: 'What do you want to know?',
+        options: ['About us', 'Contact', 'Countries']
+      };
 
     case 'Clear Chat':
       return {
