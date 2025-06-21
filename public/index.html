@@ -50,24 +50,32 @@
       <div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div>
       <div class="options"></div>
     </div>
+
+    <!-- 🔒 Input area is hidden by default -->
+    <div id="inputRow" style="display: none; border-top: 1px solid #ccc;">
+      <input type="text" id="userInput" placeholder="Type your message..." style="flex: 1; padding: 10px; border: none;">
+      <button id="sendBtn" style="padding: 10px 15px; border: none; background: #007bff; color: white;">Send</button>
+    </div>
+
     <button id="clearChatBtn">Clear Chat</button>
   </div>
+
   <script>
     const chat = document.getElementById('chat');
     let optionsDiv = document.querySelector('.options');
     const clearChatBtn = document.getElementById('clearChatBtn');
+    const inputBox = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const inputRow = document.getElementById('inputRow');
+    let isFormActive = false;
 
     function sendMessage(message) {
-      // Display user message
       const userDiv = document.createElement('div');
       userDiv.className = 'user';
       userDiv.textContent = `You: ${message}`;
       chat.insertBefore(userDiv, optionsDiv);
-
-      // Scroll to bottom after user message
       chat.scrollTop = chat.scrollHeight;
 
-      // Send to server
       fetch('/chat', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -75,7 +83,15 @@
       })
       .then(res => res.json())
       .then(data => {
-        // If user clicked 'Clear Chat' from options, reset chat UI
+        // ✅ Show/hide input based on form activity
+        if (message === 'Connect with Company') {
+          isFormActive = true;
+          inputRow.style.display = 'flex';
+        } else if (message === 'Back' || message === 'Clear Chat' || data.reply.includes('submitted successfully')) {
+          isFormActive = false;
+          inputRow.style.display = 'none';
+        }
+
         if (message === 'Clear Chat') {
           chat.innerHTML = `
             <div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div>
@@ -90,33 +106,43 @@
         botDiv.className = 'bot';
         botDiv.innerHTML = `<strong>Owl:</strong> ${data.reply}`;
         chat.insertBefore(botDiv, optionsDiv);
-
-        // Scroll to bottom after bot message
         chat.scrollTop = chat.scrollHeight;
 
-        // Clear options
         optionsDiv.innerHTML = '';
-        data.options.forEach(opt => {
-          const btn = document.createElement('button');
-          btn.textContent = opt;
-          btn.onclick = () => sendMessage(opt);
-          optionsDiv.appendChild(btn);
-        });
+        if (data.options) {
+          data.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.textContent = opt;
+            btn.onclick = () => sendMessage(opt);
+            optionsDiv.appendChild(btn);
+          });
+        }
       });
     }
 
-    // Clear chat and restart
+    // 🟢 Send typed message (only when allowed)
+    sendBtn.onclick = () => {
+      const msg = inputBox.value.trim();
+      if (!isFormActive && msg !== 'Connect with Company') return;
+      if (msg) {
+        sendMessage(msg);
+        inputBox.value = '';
+      }
+    };
+
+    inputBox.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+
+    // 🔄 Clear Chat
     clearChatBtn.onclick = function() {
-      chat.innerHTML = `
-        <div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div>
-        <div class="options"></div>
-      `;
+      chat.innerHTML = `<div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div><div class="options"></div>`;
       optionsDiv = document.querySelector('.options');
       sendMessage('Hello');
       sendMessage('Clear Chat');
     };
 
-    // Start the bot 
+    // 🚀 Initial Trigger
     sendMessage('Hello');
   </script>
 </body>
