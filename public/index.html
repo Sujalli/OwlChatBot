@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Clickable Chatbot</title>
+  <title>Chatbot</title>
   <style>
-    body { font-family: sans-serif; background: #f2f2f2; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
     #chatbot-container {
       position: fixed;
       bottom: 30px;
@@ -51,7 +51,7 @@
       <div class="options"></div>
     </div>
 
-    <!-- 🔒 Input area is hidden by default -->
+    <!-- Typing input, hidden by default -->
     <div id="inputRow" style="display: none; border-top: 1px solid #ccc;">
       <input type="text" id="userInput" placeholder="Type your message..." style="flex: 1; padding: 10px; border: none;">
       <button id="sendBtn" style="padding: 10px 15px; border: none; background: #007bff; color: white;">Send</button>
@@ -69,6 +69,13 @@
     const inputRow = document.getElementById('inputRow');
     let isFormActive = false;
 
+    function formStateActive(replyText) {
+      return replyText.includes("Please enter your") ||
+             replyText.includes("Please confirm your details") ||
+             replyText.includes("❌") ||
+             replyText.includes("✍️");
+    }
+
     function sendMessage(message) {
       const userDiv = document.createElement('div');
       userDiv.className = 'user';
@@ -83,20 +90,17 @@
       })
       .then(res => res.json())
       .then(data => {
-        // ✅ Show/hide input based on form activity
-        if (message === 'Connect with Company') {
-          isFormActive = true;
-          inputRow.style.display = 'flex';
-        } else if (message === 'Back' || message === 'Clear Chat' || data.reply.includes('submitted successfully')) {
+        // 💬 Enable typing box if reply is a form question or error
+        if (message === 'Clear Chat' || data.reply.includes('submitted successfully')) {
           isFormActive = false;
           inputRow.style.display = 'none';
+        } else if (formStateActive(data.reply)) {
+          isFormActive = true;
+          inputRow.style.display = 'flex';
         }
 
         if (message === 'Clear Chat') {
-          chat.innerHTML = `
-            <div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div>
-            <div class="options"></div>
-          `;
+          chat.innerHTML = `<div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div><div class="options"></div>`;
           optionsDiv = document.querySelector('.options');
           sendMessage('Hello');
           return;
@@ -120,7 +124,6 @@
       });
     }
 
-    // 🟢 Send typed message (only when allowed)
     sendBtn.onclick = () => {
       const msg = inputBox.value.trim();
       if (!isFormActive && msg !== 'Connect with Company') return;
@@ -134,15 +137,12 @@
       if (e.key === 'Enter') sendBtn.click();
     });
 
-    // 🔄 Clear Chat
     clearChatBtn.onclick = function() {
       chat.innerHTML = `<div class="bot"><span style="font-size:2rem;">🦉</span> OWL ChatBot!</div><div class="options"></div>`;
       optionsDiv = document.querySelector('.options');
-      sendMessage('Hello');
       sendMessage('Clear Chat');
     };
 
-    // 🚀 Initial Trigger
     sendMessage('Hello');
   </script>
 </body>

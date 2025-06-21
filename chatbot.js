@@ -159,7 +159,33 @@ function getBotResponse(message) {
         options: Object.keys(map).concat(['Back'])
       };
     case 'Back':
-      return getBotResponse('Hello');
+  if (formState.active) {
+    if (formState.confirm) {
+      // Going back from confirmation step
+      formState.confirm = false;
+      formState.step = steps.length - 1;
+      return {
+        reply: steps[formState.step].question,
+        options: ['Back']
+      };
+    } else if (formState.step > 0) {
+      // Going back one question in the form
+      formState.step -= 1;
+      return {
+        reply: steps[formState.step].question,
+        options: formState.step > 0 ? ['Back'] : []
+      };
+    } else {
+      // Already at the first step
+      return {
+        reply: steps[formState.step].question,
+        options: []
+      };
+    }
+  }
+
+  return getBotResponse('Hello');
+
     default:
       const normalized = input.toLowerCase();
       const matched = Object.keys(map).find(c => c.toLowerCase() === normalized);
